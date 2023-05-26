@@ -1,0 +1,20 @@
+.ButtonLink button {
+  display: block;
+  width: 190px;
+  height: 30px;
+  margin-top: 10px;
+  border: 3px inset rgb(221, 230, 237);
+  background-color: rgb(39, 55, 77);
+  color: rgb(221, 230, 237);
+  transition: .5s ease-in-out background-color;
+}
+  
+.ButtonLink button:hover {
+  border-color: rgb(221, 230, 237);
+  background-color: rgb(221, 230, 237);
+  color: rgb(39, 55, 77);
+}
+
+.ButtonLink a {
+  text-decoration: none;
+}

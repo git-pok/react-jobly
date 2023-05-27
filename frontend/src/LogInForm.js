@@ -1,5 +1,6 @@
 import { useState, useContext, useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
+import Message from './Message.js';
 import JoblyApi from './models/JoblyApi.js';
 import JoblyContext from './context/JoblyContext.js';
 import useLocalStorage from './hooks/useLocalStorage.js';
@@ -11,27 +12,31 @@ const LogInForm = () => {
   const initialState = { username: "", password: "" };
   const [ formData, setFormData ] = useState(initialState);
   const [ isSubmitted, setIsSubmitted ] = useToggleState(false);
-  const [ localStorage, setLocalStorage ] = useLocalStorage("userData", null);
   const { setUserData, userData } = useContext(JoblyContext);
+  const [ invalidForm, setInvalidForm ] = useToggleState(false);
 
   useEffect(() => {
     const login = async () => {
       const { username, password } = formData;
-      const loginResult = await JoblyApi.logIn({endpoint: "auth/token", username, password});
-      const token = loginResult.data.token;
-      const payload = await jwt_decode(token);
-      payload.token = token;
-  
-      setLocalStorage(() => (
-        payload
-      ));
-  
-      setUserData(() => (
-        payload
-      ));
+      try {
+        const loginResult = await JoblyApi.logIn({endpoint: "auth/token", username, password});
+        const token = loginResult.data.token;    
+        const payload = await jwt_decode(token);
+        payload.token = token;
+        setUserData(() => (
+          payload
+        ));
 
-      setIsSubmitted();
-      setFormData(() => initialState);
+        setIsSubmitted();
+        setFormData(() => initialState);
+        <Redirect exact to="/" />
+
+      } catch (err) {
+        <Redirect exact to="/login" />
+        setInvalidForm();
+        setTimeout(setInvalidForm, 3000);
+        setTimeout(setIsSubmitted, 3000);
+      }
     }
 
     if (isSubmitted) login();
@@ -52,7 +57,7 @@ const LogInForm = () => {
     setIsSubmitted();
   }
 
-  if (isSubmitted) return <Redirect exact to="/" />;
+  // if (isSubmitted) return <Redirect exact to="/" />;
 
   return (
     <>
@@ -76,6 +81,15 @@ const LogInForm = () => {
         name="password"
         placeholder="Type a password"
         autoComplete="current-password"></input>
+      {
+        invalidForm &&
+        <Message msgObj={
+          {
+            class: "fail",
+            msg: "Invalid form data!"
+          }
+        } />
+      }
       <button>SUBMIT</button>
     </form>
     </>
